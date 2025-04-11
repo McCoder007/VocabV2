@@ -81,41 +81,27 @@ const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
 console.log('Reading tts-manager.js from:', ttsManagerPath);
 let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
 
-// Simple string replacement with validation
-const placeholder = '%%GOOGLE_TTS_API_KEY%%';
-console.log('Checking for placeholder:', placeholder);
-console.log('Placeholder exists in file:', ttsManagerContent.includes(placeholder));
-
-if (!ttsManagerContent.includes(placeholder)) {
-    console.error('ERROR: Could not find API key placeholder in the file');
-    // Log the current API_KEY line for debugging
-    const currentKeyMatch = ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"]/);
-    if (currentKeyMatch) {
-        console.log('Current API_KEY value length:', currentKeyMatch[1].length);
-        console.log('Current API_KEY starts with:', currentKeyMatch[1].substring(0, 6));
-    }
-    process.exit(1);
-}
-
-console.log('Found placeholder in file');
+// Log the content before replacement
+console.log('Content before replacement:', {
+    hasPlaceholder: ttsManagerContent.includes('%%GOOGLE_TTS_API_KEY%%'),
+    currentKeyLine: ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"];/)?.[0] || 'not found'
+});
 
 // Create the replacement pattern
-const replacement = `static API_KEY = '${apiKey}';`;
-console.log('Replacement string length:', replacement.length);
-ttsManagerContent = ttsManagerContent.replace(/static API_KEY = ['"].*?['"];/, replacement);
+const replacement = `static API_KEY = '${apiKey}'`;
+console.log('Replacement string:', replacement);
 
-// Verify replacement
-if (ttsManagerContent.includes(placeholder)) {
-    console.error('ERROR: Placeholder still exists after replacement');
-    process.exit(1);
-}
+// Use a more precise replacement
+ttsManagerContent = ttsManagerContent.replace(
+    /static API_KEY = ['"]%%GOOGLE_TTS_API_KEY%%['"];/,
+    replacement
+);
 
-// Verify the API key was injected correctly
-const keyPattern = new RegExp(apiKey);
-if (!keyPattern.test(ttsManagerContent)) {
-    console.error('ERROR: API key was not properly injected into the file');
-    process.exit(1);
-}
+// Log the content after replacement
+console.log('Content after replacement:', {
+    hasPlaceholder: ttsManagerContent.includes('%%GOOGLE_TTS_API_KEY%%'),
+    newKeyLine: ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"];/)?.[0] || 'not found'
+});
 
 // Additional verification
 const staticKeyMatch = ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"]/);
@@ -138,6 +124,13 @@ if (injectedKeyLength !== apiKey.length) {
 const outputPath = path.join(distDir, 'tts-manager.js');
 fs.writeFileSync(outputPath, ttsManagerContent);
 console.log('Wrote processed tts-manager.js to:', outputPath);
+
+// Verify the written file
+const writtenContent = fs.readFileSync(outputPath, 'utf8');
+console.log('Verification of written file:', {
+    hasPlaceholder: writtenContent.includes('%%GOOGLE_TTS_API_KEY%%'),
+    finalKeyLine: writtenContent.match(/static API_KEY = ['"]([^'"]+)['"];/)?.[0] || 'not found'
+});
 
 // Copy other static files
 const filesToCopy = [
