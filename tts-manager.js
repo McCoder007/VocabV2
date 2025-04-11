@@ -14,8 +14,7 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        // This placeholder will be replaced during build time
-        return '__GOOGLE_TTS_API_KEY__';
+        return ''; // This placeholder will be replaced during build time
     }
 
     /**

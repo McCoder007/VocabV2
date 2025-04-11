@@ -32,9 +32,11 @@ if (!fs.existsSync(distDir)) {
 const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
 let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
 
-// Replace all instances of the placeholder with the actual API key
-const placeholder = '__GOOGLE_TTS_API_KEY__';
-ttsManagerContent = ttsManagerContent.split(placeholder).join(apiKey);
+// Replace the API key
+ttsManagerContent = ttsManagerContent.replace(
+    /return ['"].*['"];(\s*\/\/\s*This placeholder will be replaced during build time)/,
+    `return '${apiKey}'; // This placeholder will be replaced during build time`
+);
 
 // Write the processed tts-manager.js to dist
 fs.writeFileSync(path.join(distDir, 'tts-manager.js'), ttsManagerContent);
