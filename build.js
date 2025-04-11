@@ -38,28 +38,22 @@ const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
 console.log('Reading tts-manager.js from:', ttsManagerPath);
 let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
 
-// Find the getApiKey method
-const getApiKeyMethodRegex = /getApiKey\(\)\s*{\s*[^}]*}/;
-const getApiKeyMethod = ttsManagerContent.match(getApiKeyMethodRegex);
-
-if (!getApiKeyMethod) {
-    console.error('ERROR: Could not find getApiKey method in the file');
+// Simple string replacement
+const placeholder = '%%GOOGLE_TTS_API_KEY%%';
+if (!ttsManagerContent.includes(placeholder)) {
+    console.error('ERROR: Could not find API key placeholder in the file');
     process.exit(1);
 }
 
-console.log('Found getApiKey method:', getApiKeyMethod[0].replace(/'.*'/g, "'[REDACTED]'"));
-
-// Replace the entire getApiKey method
-const newGetApiKeyMethod = `getApiKey() {
-        // API key injected during build
-        return '${apiKey}';
-    }`;
-
-ttsManagerContent = ttsManagerContent.replace(getApiKeyMethodRegex, newGetApiKeyMethod);
+console.log('Found placeholder in file');
+ttsManagerContent = ttsManagerContent.replace(placeholder, apiKey);
 
 // Verify replacement
-const verifyMethod = ttsManagerContent.match(getApiKeyMethodRegex);
-console.log('Verification - new getApiKey method:', verifyMethod ? verifyMethod[0].replace(/'.*'/g, "'[REDACTED]'") : 'NOT FOUND');
+if (ttsManagerContent.includes(placeholder)) {
+    console.error('ERROR: Placeholder still exists after replacement');
+    process.exit(1);
+}
+console.log('API key replacement successful');
 
 // Write the processed tts-manager.js to dist
 const outputPath = path.join(distDir, 'tts-manager.js');
