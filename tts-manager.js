@@ -14,8 +14,7 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        // This placeholder will be replaced during build time
-        return 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8';
+        return 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8'; // This placeholder will be replaced during build time
     }
 
     /**
@@ -45,7 +44,7 @@ class GoogleTTSManager {
     speakWithGoogleTTS(text, lang, voice) {
         return new Promise((resolve, reject) => {
             // Check if API key is available and not the placeholder
-            if (!this.apiKey || this.apiKey === 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8') {
+            if (!this.apiKey || this.apiKey === '__GOOGLE_TTS_API_KEY__') {
                 reject(new Error('Google TTS API key not configured'));
                 return;
             }
