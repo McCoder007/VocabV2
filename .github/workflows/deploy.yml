@@ -15,6 +15,8 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: github-pages
+    env:
+      GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,24 +26,15 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Create .env file
-        run: |
-          echo "Creating .env file..."
-          echo "GOOGLE_TTS_API_KEY=${{ secrets.GOOGLE_TTS_API_KEY }}" > .env
-          echo "Verifying .env file content length..."
-          cat .env | wc -c
-
       - name: Install dependencies
         run: npm install
 
       - name: Build
         run: |
           echo "Build environment check:"
-          echo "API key from .env file length: $(grep GOOGLE_TTS_API_KEY .env | cut -d'=' -f2 | wc -c)"
-          echo "API key from env var length: ${#GOOGLE_TTS_API_KEY}"
-          npm run build
-        env:
-          GOOGLE_TTS_API_KEY: ${{ secrets.GOOGLE_TTS_API_KEY }}
+          echo "API key exists: ${{ secrets.GOOGLE_TTS_API_KEY != '' }}"
+          echo "API key length: ${#GOOGLE_TTS_API_KEY}"
+          node build.js
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
