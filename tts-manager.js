@@ -15,7 +15,8 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        const key = ''; // This placeholder will be replaced during build time
+        // This entire method will be replaced during build
+        const key = '';
         console.log('getApiKey called, returning key of length:', key ? key.length : 0);
         return key;
     }
