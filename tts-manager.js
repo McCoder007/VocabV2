@@ -4,20 +4,15 @@
  */
 class GoogleTTSManager {
     constructor() {
-        this.apiKey = this.getApiKey();
+        this.apiKey = GoogleTTSManager.API_KEY;
         console.log('TTS Manager initialized with API key length:', this.apiKey ? this.apiKey.length : 0);
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
     }
 
-    /**
-     * Get the API key from environment or placeholder
-     */
-    getApiKey() {
-        // IMPORTANT: The line below will be replaced during build - do not modify the format
-        return '%%GOOGLE_TTS_API_KEY%%';
-    }
+    // This will be replaced during build
+    static API_KEY = '%%GOOGLE_TTS_API_KEY%%';
 
     /**
      * Speak the given text using Google TTS API with browser fallback

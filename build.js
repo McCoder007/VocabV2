@@ -84,8 +84,10 @@ if (!ttsManagerContent.includes(placeholder)) {
 }
 
 console.log('Found placeholder in file');
-const originalContent = ttsManagerContent;
-ttsManagerContent = ttsManagerContent.replace(placeholder, apiKey);
+
+// Create the replacement pattern
+const replacement = `static API_KEY = '${apiKey}';`;
+ttsManagerContent = ttsManagerContent.replace(/static API_KEY = ['"].*?['"];/, replacement);
 
 // Verify replacement
 if (ttsManagerContent.includes(placeholder)) {
@@ -100,9 +102,20 @@ if (!keyPattern.test(ttsManagerContent)) {
     process.exit(1);
 }
 
-console.log('API key replacement successful');
-console.log('Verifying API key length in processed file:', 
-    ttsManagerContent.match(/return ['"]([^'"]+)['"]/)[1].length);
+// Additional verification
+const staticKeyMatch = ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"]/);
+if (!staticKeyMatch) {
+    console.error('ERROR: Could not find static API_KEY after replacement');
+    process.exit(1);
+}
+
+const injectedKeyLength = staticKeyMatch[1].length;
+console.log('Verifying injected API key length:', injectedKeyLength);
+if (injectedKeyLength !== apiKey.length) {
+    console.error('ERROR: Injected key length mismatch');
+    console.error('Expected:', apiKey.length, 'Got:', injectedKeyLength);
+    process.exit(1);
+}
 
 // Write the processed tts-manager.js to dist
 const outputPath = path.join(distDir, 'tts-manager.js');
