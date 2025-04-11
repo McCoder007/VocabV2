@@ -18,11 +18,18 @@ dotenv.config();
 const apiKey = process.env.GOOGLE_TTS_API_KEY;
 
 console.log('Build process starting...');
+console.log('Raw env variable:', process.env.GOOGLE_TTS_API_KEY ? '[PRESENT]' : '[MISSING]');
 console.log('API key exists:', !!apiKey);
 console.log('API key length:', apiKey ? apiKey.length : 0);
+console.log('API key starts with:', apiKey ? apiKey.substring(0, 6) + '...' : '[MISSING]');
 
 if (!apiKey) {
-  console.error('Error: GOOGLE_TTS_API_KEY not found in .env file');
+  console.error('Error: GOOGLE_TTS_API_KEY not found in environment');
+  process.exit(1);
+}
+
+if (apiKey === 'GOOGLE_TTS_API_KEY') {
+  console.error('Error: GOOGLE_TTS_API_KEY is the literal string "GOOGLE_TTS_API_KEY" instead of the actual key');
   process.exit(1);
 }
 
@@ -30,6 +37,7 @@ if (!apiKey) {
 if (apiKey.length < 30) {
   console.error('Error: API key seems too short. Google API keys are typically longer.');
   console.error('Expected length: ~39 characters, Got:', apiKey.length);
+  console.error('Key starts with:', apiKey.substring(0, 6) + '...');
   process.exit(1);
 }
 
