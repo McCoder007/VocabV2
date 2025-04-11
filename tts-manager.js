@@ -4,7 +4,7 @@
  */
 class GoogleTTSManager {
     constructor() {
-        this.apiKey = this.getApiKey();
+        this.apiKey = process.env.GOOGLE_TTS_API_KEY || '__GOOGLE_TTS_API_KEY__';
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
@@ -14,7 +14,7 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        // In a real implementation, this would be replaced during build time
+        // This placeholder will be replaced during build time
         return '__GOOGLE_TTS_API_KEY__';
     }
 
