@@ -21,16 +21,21 @@ console.log('Build process starting...');
 console.log('Initial checks:');
 console.log('1. Direct env var:', process.env.GOOGLE_TTS_API_KEY ? '[PRESENT]' : '[MISSING]');
 console.log('2. Loaded apiKey var:', apiKey ? '[PRESENT]' : '[MISSING]');
+console.log('3. Direct env var type:', typeof process.env.GOOGLE_TTS_API_KEY);
+console.log('4. Direct env var length:', process.env.GOOGLE_TTS_API_KEY ? process.env.GOOGLE_TTS_API_KEY.length : 0);
+console.log('5. First 6 chars:', process.env.GOOGLE_TTS_API_KEY ? process.env.GOOGLE_TTS_API_KEY.substring(0, 6) : 'N/A');
 
 // Try reading from .env file directly as backup
 if (!apiKey || apiKey.length < 30) {
     console.log('API key missing or too short, trying to read from .env file directly...');
     try {
         const envContent = fs.readFileSync('.env', 'utf8');
+        console.log('.env file content length:', envContent.length);
         const envMatch = envContent.match(/GOOGLE_TTS_API_KEY=(.+)/);
         if (envMatch && envMatch[1]) {
             apiKey = envMatch[1].trim();
             console.log('Successfully read API key from .env file');
+            console.log('Key from .env length:', apiKey.length);
         }
     } catch (error) {
         console.error('Error reading .env file:', error.message);
@@ -78,8 +83,17 @@ let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
 
 // Simple string replacement with validation
 const placeholder = '%%GOOGLE_TTS_API_KEY%%';
+console.log('Checking for placeholder:', placeholder);
+console.log('Placeholder exists in file:', ttsManagerContent.includes(placeholder));
+
 if (!ttsManagerContent.includes(placeholder)) {
     console.error('ERROR: Could not find API key placeholder in the file');
+    // Log the current API_KEY line for debugging
+    const currentKeyMatch = ttsManagerContent.match(/static API_KEY = ['"]([^'"]+)['"]/);
+    if (currentKeyMatch) {
+        console.log('Current API_KEY value length:', currentKeyMatch[1].length);
+        console.log('Current API_KEY starts with:', currentKeyMatch[1].substring(0, 6));
+    }
     process.exit(1);
 }
 
@@ -87,6 +101,7 @@ console.log('Found placeholder in file');
 
 // Create the replacement pattern
 const replacement = `static API_KEY = '${apiKey}';`;
+console.log('Replacement string length:', replacement.length);
 ttsManagerContent = ttsManagerContent.replace(/static API_KEY = ['"].*?['"];/, replacement);
 
 // Verify replacement
@@ -111,6 +126,8 @@ if (!staticKeyMatch) {
 
 const injectedKeyLength = staticKeyMatch[1].length;
 console.log('Verifying injected API key length:', injectedKeyLength);
+console.log('Injected key starts with:', staticKeyMatch[1].substring(0, 6));
+
 if (injectedKeyLength !== apiKey.length) {
     console.error('ERROR: Injected key length mismatch');
     console.error('Expected:', apiKey.length, 'Got:', injectedKeyLength);
