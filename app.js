@@ -131,7 +131,7 @@ class VocabApp {
     
     speakWord(text) {
         // Use Google TTS with fallback to browser TTS
-        this.ttsManager.speak(text, 'en-US');
+        this.ttsManager.speak(text, 'en-US', 'en-US-Neural2-D');
     }
     
     nextItem() {
