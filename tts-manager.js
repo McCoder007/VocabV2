@@ -12,7 +12,8 @@ class GoogleTTSManager {
     }
 
     // This will be replaced during build
-    static API_KEY = 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8';
+    static API_KEY = 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8
+';
 
     /**
      * Speak the given text using Google TTS API with browser fallback
