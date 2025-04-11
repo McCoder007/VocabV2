@@ -38,14 +38,14 @@ const filesToCopy = [
 
 // Process tts-manager.js
 const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
-const ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
-const processedTtsManager = ttsManagerContent.replace(
-  /return ['"]__GOOGLE_TTS_API_KEY__['"];/,
-  `return '${apiKey}';`
-);
+let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
+
+// Replace all instances of the placeholder with the actual API key
+const placeholder = '__GOOGLE_TTS_API_KEY__';
+ttsManagerContent = ttsManagerContent.split(placeholder).join(apiKey);
 
 // Write the processed tts-manager.js to dist
-fs.writeFileSync(path.join(distDir, 'tts-manager.js'), processedTtsManager);
+fs.writeFileSync(path.join(distDir, 'tts-manager.js'), ttsManagerContent);
 
 // Copy other files
 filesToCopy.forEach(file => {

@@ -33,6 +33,7 @@ class VocabApp {
         this.isAutoMode = false;
         this.revealDelay = 4000; // 4 seconds delay
         this.countdownInterval = null;
+        this.hasUserInteracted = false;
         
         // DOM elements
         this.imageElement = document.getElementById('vocab-image');
@@ -121,8 +122,10 @@ class VocabApp {
                 setTimeout(() => this.nextItem(), 2000);
             }
             
-            // Speak the English word using Google TTS
-            this.speakWord(this.englishWord.textContent);
+            // Only speak if user has interacted with the page
+            if (this.hasUserInteracted) {
+                this.speakWord(this.englishWord.textContent);
+            }
         }, 50);
     }
     
@@ -147,7 +150,25 @@ class VocabApp {
     }
     
     setupEventListeners() {
-        this.nextButton.addEventListener('click', () => this.nextItem());
+        // Handle user interaction
+        const handleUserInteraction = () => {
+            if (!this.hasUserInteracted) {
+                this.hasUserInteracted = true;
+                // If words are already visible, speak them
+                if (this.englishWord.classList.contains('visible')) {
+                    this.speakWord(this.englishWord.textContent);
+                }
+            }
+        };
+
+        // Add interaction listeners
+        this.nextButton.addEventListener('click', () => {
+            handleUserInteraction();
+            this.nextItem();
+        });
+
+        // Add click listener to the entire container for first interaction
+        document.querySelector('.container').addEventListener('click', handleUserInteraction);
     }
 }
 

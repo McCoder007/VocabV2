@@ -45,8 +45,8 @@ class GoogleTTSManager {
      */
     speakWithGoogleTTS(text, lang, voice) {
         return new Promise((resolve, reject) => {
-            // Check if API key is available
-            if (!this.apiKey || this.apiKey === '__GOOGLE_TTS_API_KEY__') {
+            // Check if API key is available and not the placeholder
+            if (!this.apiKey) {
                 reject(new Error('Google TTS API key not configured'));
                 return;
             }
@@ -141,27 +141,38 @@ class GoogleTTSManager {
      * Play audio data from a buffer
      * @param {ArrayBuffer} audioData - The audio data to play
      */
-    playAudioData(audioData) {
-        // Create audio context if it doesn't exist
-        if (!this.audioContext) {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-
-        // Decode the audio data
-        this.audioContext.decodeAudioData(audioData, 
-            (buffer) => {
-                // Add to queue
-                this.audioQueue.push(buffer);
-                
-                // Start playing if not already playing
-                if (!this.isPlaying) {
-                    this.playNextInQueue();
-                }
-            },
-            (error) => {
-                console.error('Error decoding audio data:', error);
+    async playAudioData(audioData) {
+        try {
+            // Create audio context if it doesn't exist
+            if (!this.audioContext) {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-        );
+
+            // Resume the audio context if it's suspended
+            if (this.audioContext.state === 'suspended') {
+                await this.audioContext.resume();
+            }
+
+            // Decode the audio data
+            this.audioContext.decodeAudioData(audioData, 
+                (buffer) => {
+                    // Add to queue
+                    this.audioQueue.push(buffer);
+                    
+                    // Start playing if not already playing
+                    if (!this.isPlaying) {
+                        this.playNextInQueue();
+                    }
+                },
+                (error) => {
+                    console.error('Error decoding audio data:', error);
+                }
+            );
+        } catch (error) {
+            console.error('Error playing audio:', error);
+            // Fall back to browser TTS if there's an error
+            this.speakWithBrowserTTS(text);
+        }
     }
 
     /**
