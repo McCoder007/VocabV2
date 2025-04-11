@@ -36,8 +36,19 @@ jobs:
           echo "API key length: ${#GOOGLE_TTS_API_KEY}"
           node build.js
 
+      - name: Add cache-busting
+        run: |
+          TIMESTAMP=$(date +%s)
+          echo "Adding cache-busting timestamp: $TIMESTAMP"
+          sed -i "s|</head>|<meta http-equiv='cache-control' content='no-cache'><meta http-equiv='expires' content='0'><meta http-equiv='pragma' content='no-cache'></head>|g" dist/index.html
+          for file in dist/*.js; do
+            mv "$file" "${file%.js}.${TIMESTAMP}.js"
+            sed -i "s|${file##*/}|${file##*/%.js}.${TIMESTAMP}.js|g" dist/index.html
+          done
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
+          clean: true # Automatically remove deleted files from the deploy branch
