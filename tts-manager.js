@@ -4,7 +4,7 @@
  */
 class GoogleTTSManager {
     constructor() {
-        this.apiKey = process.env.GOOGLE_TTS_API_KEY || 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8';
+        this.apiKey = this.getApiKey();
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
