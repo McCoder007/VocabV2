@@ -1,0 +1,14 @@
+{
+  "name": "vocabv2",
+  "version": "1.0.0",
+  "description": "Vocabulary learning application with text-to-speech support",
+  "main": "app.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  },
+  "private": true
+} 

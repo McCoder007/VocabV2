@@ -22,10 +22,33 @@ A mobile web application for learning vocabulary through images with text-to-spe
      ```
      GOOGLE_TTS_API_KEY=your_api_key_here
      ```
+4. Install dependencies:
+   ```
+   npm install
+   ```
+
+## Building the Application
+
+To build the application for deployment:
+
+```
+npm run build
+```
+
+This will:
+1. Read the API key from your `.env` file
+2. Replace the placeholder in `tts-manager.js` with your actual API key
+3. Create a `dist` directory with all the prepared files
 
 ## Running the Application
 
+### Development
+
 1. Start a local server:
+   ```
+   npm start
+   ```
+   or
    ```
    python3 -m http.server 8000
    ```
@@ -33,6 +56,14 @@ A mobile web application for learning vocabulary through images with text-to-spe
    ```
    http://localhost:8000
    ```
+
+### Production
+
+1. Build the application:
+   ```
+   npm run build
+   ```
+2. Deploy the contents of the `dist` directory to your hosting service (e.g., GitHub Pages)
 
 ## Adding New Vocabulary
 
