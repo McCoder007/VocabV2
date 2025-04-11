@@ -15,30 +15,48 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Get the API key from environment variables
-const apiKey = process.env.GOOGLE_TTS_API_KEY;
+let apiKey = process.env.GOOGLE_TTS_API_KEY;
 
 console.log('Build process starting...');
-console.log('Raw env variable:', process.env.GOOGLE_TTS_API_KEY ? '[PRESENT]' : '[MISSING]');
-console.log('API key exists:', !!apiKey);
-console.log('API key length:', apiKey ? apiKey.length : 0);
-console.log('API key starts with:', apiKey ? apiKey.substring(0, 6) + '...' : '[MISSING]');
+console.log('Initial checks:');
+console.log('1. Direct env var:', process.env.GOOGLE_TTS_API_KEY ? '[PRESENT]' : '[MISSING]');
+console.log('2. Loaded apiKey var:', apiKey ? '[PRESENT]' : '[MISSING]');
 
-if (!apiKey) {
-  console.error('Error: GOOGLE_TTS_API_KEY not found in environment');
-  process.exit(1);
+// Try reading from .env file directly as backup
+if (!apiKey || apiKey.length < 30) {
+    console.log('API key missing or too short, trying to read from .env file directly...');
+    try {
+        const envContent = fs.readFileSync('.env', 'utf8');
+        const envMatch = envContent.match(/GOOGLE_TTS_API_KEY=(.+)/);
+        if (envMatch && envMatch[1]) {
+            apiKey = envMatch[1].trim();
+            console.log('Successfully read API key from .env file');
+        }
+    } catch (error) {
+        console.error('Error reading .env file:', error.message);
+    }
 }
 
-if (apiKey === 'GOOGLE_TTS_API_KEY') {
-  console.error('Error: GOOGLE_TTS_API_KEY is the literal string "GOOGLE_TTS_API_KEY" instead of the actual key');
-  process.exit(1);
+console.log('Final API key check:');
+console.log('- Key exists:', !!apiKey);
+console.log('- Key length:', apiKey ? apiKey.length : 0);
+console.log('- Key starts with:', apiKey ? apiKey.substring(0, 6) + '...' : '[MISSING]');
+
+if (!apiKey) {
+    console.error('Error: Could not find API key in environment or .env file');
+    process.exit(1);
+}
+
+if (apiKey === 'GOOGLE_TTS_API_KEY' || apiKey.length === 22) {
+    console.error('Error: Found literal "GOOGLE_TTS_API_KEY" instead of actual key');
+    process.exit(1);
 }
 
 // Validate API key format
 if (apiKey.length < 30) {
-  console.error('Error: API key seems too short. Google API keys are typically longer.');
-  console.error('Expected length: ~39 characters, Got:', apiKey.length);
-  console.error('Key starts with:', apiKey.substring(0, 6) + '...');
-  process.exit(1);
+    console.error('Error: API key seems too short. Google API keys are typically longer.');
+    console.error('Expected length: ~39 characters, Got:', apiKey.length);
+    process.exit(1);
 }
 
 if (!apiKey.startsWith('AIza')) {
