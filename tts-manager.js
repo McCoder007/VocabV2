@@ -5,7 +5,11 @@
 class GoogleTTSManager {
     constructor() {
         this.apiKey = GoogleTTSManager.API_KEY;
-        console.log('TTS Manager initialized with API key length:', this.apiKey ? this.apiKey.length : 0);
+        console.log('TTS Manager initialized with API key:', {
+            length: this.apiKey ? this.apiKey.length : 0,
+            firstChars: this.apiKey ? this.apiKey.substring(0, 6) : 'none',
+            timestamp: new Date().toISOString()
+        });
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
@@ -22,7 +26,13 @@ class GoogleTTSManager {
      * @param {string} voice - The voice name (optional)
      */
     speak(text, lang = 'en-US', voice = null) {
-        console.log('speak called with:', { textLength: text ? text.length : 0, lang, voice });
+        console.log('speak called with:', { 
+            textLength: text ? text.length : 0, 
+            lang, 
+            voice,
+            apiKeyLength: this.apiKey ? this.apiKey.length : 0,
+            apiKeyStart: this.apiKey ? this.apiKey.substring(0, 6) : 'none'
+        });
         if (!text) return;
 
         // Try Google TTS first, fall back to browser TTS if needed
@@ -31,7 +41,8 @@ class GoogleTTSManager {
                 console.error('Detailed Google TTS error:', {
                     message: error.message,
                     apiKeyExists: !!this.apiKey,
-                    apiKeyLength: this.apiKey ? this.apiKey.length : 0
+                    apiKeyLength: this.apiKey ? this.apiKey.length : 0,
+                    apiKeyStart: this.apiKey ? this.apiKey.substring(0, 6) : 'none'
                 });
                 this.speakWithBrowserTTS(text, lang, voice);
             });
