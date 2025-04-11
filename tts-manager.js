@@ -15,7 +15,7 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        // API key injected during build
+        // IMPORTANT: The line below will be replaced during build - do not modify the format
         return 'AIzaSyBBe1XfNjodUza5EHDLbs6HTWk8O64b5c8';
     }
 
