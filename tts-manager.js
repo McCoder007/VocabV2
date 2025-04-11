@@ -5,6 +5,7 @@
 class GoogleTTSManager {
     constructor() {
         this.apiKey = this.getApiKey();
+        console.log('TTS Manager initialized with API key length:', this.apiKey ? this.apiKey.length : 0);
         this.audioContext = null;
         this.audioQueue = [];
         this.isPlaying = false;
@@ -14,7 +15,9 @@ class GoogleTTSManager {
      * Get the API key from environment or placeholder
      */
     getApiKey() {
-        return ''; // This placeholder will be replaced during build time
+        const key = ''; // This placeholder will be replaced during build time
+        console.log('getApiKey called, returning key of length:', key ? key.length : 0);
+        return key;
     }
 
     /**
@@ -24,12 +27,17 @@ class GoogleTTSManager {
      * @param {string} voice - The voice name (optional)
      */
     speak(text, lang = 'en-US', voice = null) {
+        console.log('speak called with:', { textLength: text ? text.length : 0, lang, voice });
         if (!text) return;
 
         // Try Google TTS first, fall back to browser TTS if needed
         this.speakWithGoogleTTS(text, lang, voice)
             .catch(error => {
-                console.warn('Google TTS failed, falling back to browser TTS:', error);
+                console.error('Detailed Google TTS error:', {
+                    message: error.message,
+                    apiKeyExists: !!this.apiKey,
+                    apiKeyLength: this.apiKey ? this.apiKey.length : 0
+                });
                 this.speakWithBrowserTTS(text, lang, voice);
             });
     }
@@ -43,14 +51,26 @@ class GoogleTTSManager {
      */
     speakWithGoogleTTS(text, lang, voice) {
         return new Promise((resolve, reject) => {
-            // Check if API key is available and not the placeholder
-            if (!this.apiKey || this.apiKey === '__GOOGLE_TTS_API_KEY__') {
+            console.log('speakWithGoogleTTS called with:', {
+                textLength: text ? text.length : 0,
+                lang,
+                voice,
+                apiKeyExists: !!this.apiKey,
+                apiKeyLength: this.apiKey ? this.apiKey.length : 0
+            });
+
+            // Check if API key is available and not empty
+            if (!this.apiKey) {
+                console.error('API key validation failed:', {
+                    apiKeyExists: !!this.apiKey,
+                    apiKeyLength: this.apiKey ? this.apiKey.length : 0
+                });
                 reject(new Error('Google TTS API key not configured'));
                 return;
             }
 
-            // Prepare the request
             const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${this.apiKey}`;
+            console.log('Making request to URL:', url.replace(this.apiKey, '[REDACTED]'));
             
             // Determine voice parameters
             let voiceConfig = {};

@@ -17,6 +17,10 @@ dotenv.config();
 // Get the API key from environment variables
 const apiKey = process.env.GOOGLE_TTS_API_KEY;
 
+console.log('Build process starting...');
+console.log('API key exists:', !!apiKey);
+console.log('API key length:', apiKey ? apiKey.length : 0);
+
 if (!apiKey) {
   console.error('Error: GOOGLE_TTS_API_KEY not found in .env file');
   process.exit(1);
@@ -26,20 +30,38 @@ if (!apiKey) {
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir);
+  console.log('Created dist directory');
 }
 
 // Process tts-manager.js
 const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
+console.log('Reading tts-manager.js from:', ttsManagerPath);
 let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
 
 // Replace the API key
+const originalContent = ttsManagerContent;
 ttsManagerContent = ttsManagerContent.replace(
     /return ['"].*['"];(\s*\/\/\s*This placeholder will be replaced during build time)/,
     `return '${apiKey}'; // This placeholder will be replaced during build time`
 );
 
+// Verify replacement
+const replacementSuccessful = originalContent !== ttsManagerContent;
+console.log('API key replacement successful:', replacementSuccessful);
+
+if (!replacementSuccessful) {
+    console.error('WARNING: API key was not replaced in the file. Check the regex pattern and file content.');
+    // Log the relevant part of the file content (safely)
+    const contentPreview = ttsManagerContent.split('\n')
+        .find(line => line.includes('return') && line.includes('placeholder'))
+        || 'Pattern not found';
+    console.log('Content preview:', contentPreview.replace(/['"].*['"]/, "'[REDACTED]'"));
+}
+
 // Write the processed tts-manager.js to dist
-fs.writeFileSync(path.join(distDir, 'tts-manager.js'), ttsManagerContent);
+const outputPath = path.join(distDir, 'tts-manager.js');
+fs.writeFileSync(outputPath, ttsManagerContent);
+console.log('Wrote processed tts-manager.js to:', outputPath);
 
 // Copy other static files
 const filesToCopy = [
