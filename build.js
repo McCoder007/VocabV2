@@ -28,14 +28,6 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir);
 }
 
-// Copy and process files
-const filesToCopy = [
-  'index.html',
-  'styles.css',
-  'app.js',
-  'images'
-];
-
 // Process tts-manager.js
 const ttsManagerPath = path.join(__dirname, 'tts-manager.js');
 let ttsManagerContent = fs.readFileSync(ttsManagerPath, 'utf8');
@@ -47,40 +39,32 @@ ttsManagerContent = ttsManagerContent.split(placeholder).join(apiKey);
 // Write the processed tts-manager.js to dist
 fs.writeFileSync(path.join(distDir, 'tts-manager.js'), ttsManagerContent);
 
-// Copy other files
+// Copy other static files
+const filesToCopy = [
+    'index.html',
+    'styles.css',
+    'app.js'
+];
+
 filesToCopy.forEach(file => {
-  const sourcePath = path.join(__dirname, file);
-  const destPath = path.join(distDir, file);
-  
-  if (fs.lstatSync(sourcePath).isDirectory()) {
-    // Copy directory recursively
-    copyDir(sourcePath, destPath);
-  } else {
-    // Copy file
-    fs.copyFileSync(sourcePath, destPath);
-  }
+    if (fs.existsSync(file)) {
+        fs.copyFileSync(file, path.join(distDir, file));
+    }
 });
 
-console.log('Build completed successfully! Files are ready in the dist directory.');
-
-/**
- * Recursively copy a directory
- */
-function copyDir(src, dest) {
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
-  }
-  
-  const entries = fs.readdirSync(src, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    
-    if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
+// Copy images directory if it exists
+const imagesDir = path.join(__dirname, 'images');
+if (fs.existsSync(imagesDir)) {
+    const distImagesDir = path.join(distDir, 'images');
+    if (!fs.existsSync(distImagesDir)) {
+        fs.mkdirSync(distImagesDir);
     }
-  }
-} 
+    fs.readdirSync(imagesDir).forEach(file => {
+        fs.copyFileSync(
+            path.join(imagesDir, file),
+            path.join(distImagesDir, file)
+        );
+    });
+}
+
+console.log('Build completed successfully!'); 

@@ -12,4 +12,4 @@ Thumbs.db
 *.swo
 
 # Logs
-*.log 
+*.log .env

@@ -15,7 +15,6 @@ class GoogleTTSManager {
      */
     getApiKey() {
         // In a real implementation, this would be replaced during build time
-        // For now, we'll use a placeholder that will be replaced
         return '__GOOGLE_TTS_API_KEY__';
     }
 
@@ -46,7 +45,7 @@ class GoogleTTSManager {
     speakWithGoogleTTS(text, lang, voice) {
         return new Promise((resolve, reject) => {
             // Check if API key is available and not the placeholder
-            if (!this.apiKey) {
+            if (!this.apiKey || this.apiKey === '__GOOGLE_TTS_API_KEY__') {
                 reject(new Error('Google TTS API key not configured'));
                 return;
             }
