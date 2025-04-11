@@ -29,12 +29,32 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
+      - name: Debug Pre-Build
         run: |
-          echo "Build environment check:"
+          echo "Current directory contents:"
+          ls -la
+          echo "Original tts-manager.js content:"
+          cat tts-manager.js | grep "static API_KEY"
+          echo "Environment variable check:"
           echo "API key exists: ${{ secrets.GOOGLE_TTS_API_KEY != '' }}"
           echo "API key length: ${#GOOGLE_TTS_API_KEY}"
-          node build.js
+          echo "API key first 6 chars: ${GOOGLE_TTS_API_KEY:0:6}"
+
+      - name: Build
+        run: node build.js
+
+      - name: Debug Post-Build
+        run: |
+          echo "Dist directory contents:"
+          ls -la dist/
+          echo "Built tts-manager.js content:"
+          cat dist/tts-manager.js | grep "static API_KEY"
+          echo "Verifying key in built file:"
+          if grep -q "%%GOOGLE_TTS_API_KEY%%" dist/tts-manager.js; then
+            echo "ERROR: Placeholder still exists in built file"
+          else
+            echo "Placeholder was replaced"
+          fi
 
       - name: Add cache-busting
         run: |
@@ -42,13 +62,25 @@ jobs:
           echo "Adding cache-busting timestamp: $TIMESTAMP"
           sed -i "s|</head>|<meta http-equiv='cache-control' content='no-cache'><meta http-equiv='expires' content='0'><meta http-equiv='pragma' content='no-cache'></head>|g" dist/index.html
           for file in dist/*.js; do
+            echo "Processing file: $file"
             mv "$file" "${file%.js}.${TIMESTAMP}.js"
+            echo "Renamed to: ${file%.js}.${TIMESTAMP}.js"
             sed -i "s|${file##*/}|${file##*/%.js}.${TIMESTAMP}.js|g" dist/index.html
           done
+          echo "Final index.html content:"
+          cat dist/index.html | grep ".js"
+          echo "Final dist directory contents:"
+          ls -la dist/
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
-          clean: true # Automatically remove deleted files from the deploy branch
+          clean: true
+
+      - name: Verify Deployment
+        run: |
+          git checkout gh-pages
+          echo "Deployed tts-manager.js content:"
+          find . -name "tts-manager*.js" -exec cat {} \; | grep "static API_KEY"
